@@ -1,0 +1,16 @@
+{
+  "name": "kang-portfolio-demo",
+  "version": "1.5.0",
+  "private": true,
+  "description": "九方向人物交互与滚动叙事作品集",
+  "scripts": {
+    "start": "npm run build && node server.cjs",
+    "dev": "node server.cjs --source",
+    "build": "node _workspace/tools/build-static.cjs",
+    "check": "npm run build && node _workspace/tools/verify-scrollytelling.cjs && node --check server.cjs && node _workspace/tests/static-build.test.cjs",
+    "test": "node _workspace/tests/story-media.test.cjs",
+    "test:legacy": "node _workspace/tests/pointer-video.test.cjs && node _workspace/tests/intro-depth.test.cjs",
+    "lan": "npm run build && node server.cjs --lan",
+    "dev:lan": "node server.cjs --source --lan"
+  }
+}

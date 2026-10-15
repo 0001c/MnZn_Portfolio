@@ -1,0 +1,190 @@
+{
+  "profile": {
+    "name": "MNZN.",
+    "role": "INDEPENDENT DESIGNER",
+    "tagline": "用好奇心，回应这个世界。",
+    "bio": "关注视觉、交互与叙事之间的联系。把复杂问题整理成清楚的体验，让每一个细节都有来处。",
+    "skills": [
+      "视觉设计",
+      "交互体验",
+      "品牌系统",
+      "动态叙事"
+    ],
+    "email": "",
+    "demo": true
+  },
+  "experience": [
+    {
+      "period": "2018 — 2022",
+      "organization": "设计学院 · 演示",
+      "role": "视觉传达 / 学习",
+      "description": "从字体、版式与色彩出发，建立视觉表达的基础。",
+      "status": "published"
+    },
+    {
+      "period": "2022 — 2024",
+      "organization": "创意工作室 · 演示",
+      "role": "视觉设计师 / 实践",
+      "description": "参与品牌与数字产品项目，把概念推进到完整交付。",
+      "status": "published"
+    },
+    {
+      "period": "2024 — 至今",
+      "organization": "独立设计实践 · 演示",
+      "role": "设计与构建 / 探索",
+      "description": "结合交互、动效与开发，尝试更有记忆点的作品体验。",
+      "status": "published"
+    }
+  ],
+  "categories": [
+    {
+      "id": "in-car",
+      "label": "车载",
+      "en": "IN-CAR"
+    },
+    {
+      "id": "campaign",
+      "label": "运营 Banner",
+      "en": "CAMPAIGN"
+    },
+    {
+      "id": "brand",
+      "label": "品牌全案",
+      "en": "BRANDING"
+    },
+    {
+      "id": "ip",
+      "label": "IP 形象",
+      "en": "CHARACTER"
+    },
+    {
+      "id": "illustration",
+      "label": "插画",
+      "en": "ILLUSTRATION"
+    },
+    {
+      "id": "commerce",
+      "label": "电商",
+      "en": "COMMERCE"
+    },
+    {
+      "id": "product",
+      "label": "产品渲染",
+      "en": "PRODUCT"
+    }
+  ],
+  "projects": [
+    {
+      "slug": "orbit-cockpit",
+      "title": "ORBIT · 驾驶舱体验",
+      "year": "2026",
+      "category": "in-car",
+      "summary": "让复杂信息，回到驾驶所需的清晰。",
+      "description": "演示项目：以导航、车辆状态和驾驶信息为核心，探索车载界面的阅读层级。\n设计过程：梳理信息优先级 → 建立界面系统 → 验证不同场景的可读性。\n这是一张用于展示网站布局的概念示意图，并非真实客户项目。",
+      "cover": "assets/images/works-demo/orbit.svg",
+      "alt": "ORBIT 车载界面概念演示",
+      "images": [],
+      "role": "交互 / 视觉设计",
+      "tools": "Figma",
+      "sortOrder": 10,
+      "status": "published",
+      "demo": true
+    },
+    {
+      "slug": "summer-frequency",
+      "title": "夏日频率 · 活动视觉",
+      "year": "2026",
+      "category": "campaign",
+      "summary": "用明快的节奏，把一场活动带到眼前。",
+      "description": "演示项目：以夏日音乐活动为主题，组织标题、日期与主视觉之间的关系。\n从一张主海报延展到横幅和社交媒体，让不同尺寸共享同一种识别。\n当前图像为概念排版示意，不代表实际活动或交付成果。",
+      "cover": "assets/images/works-demo/summer.svg",
+      "alt": "夏日频率活动海报概念演示",
+      "images": [],
+      "role": "主视觉 / 运营延展",
+      "tools": "Illustrator / Photoshop",
+      "sortOrder": 20,
+      "status": "published",
+      "demo": true
+    },
+    {
+      "slug": "still-coffee",
+      "title": "STILL · 咖啡品牌",
+      "year": "2025",
+      "category": "brand",
+      "summary": "为日常的一杯，留出片刻安静。",
+      "description": "演示项目：围绕一家虚构咖啡品牌，探索字标、配色和包装的统一。\n将品牌语气落实到杯身、标签与门店应用，让视觉系统服务真实使用场景。\n品牌名称、合作关系和商业成果均为演示，不属于个人真实履历。",
+      "cover": "assets/images/works-demo/still.svg",
+      "alt": "STILL 咖啡品牌概念演示",
+      "images": [],
+      "role": "品牌策略 / 视觉系统",
+      "tools": "Illustrator / Figma",
+      "sortOrder": 30,
+      "status": "published",
+      "demo": true
+    },
+    {
+      "slug": "momo-character",
+      "title": "MOMO · 好奇心伙伴",
+      "year": "2025",
+      "category": "ip",
+      "summary": "从一个圆圆的轮廓，长出可识别的性格。",
+      "description": "演示项目：通过简洁轮廓、表情和一组固定配色，构建轻松的角色识别。\n可以在真实案例中替换为三视图、动作表情与周边应用。\n当前为二维角色概念示意，没有使用作者的原始 IP 素材。",
+      "cover": "assets/images/works-demo/momo.svg",
+      "alt": "MOMO 圆形角色概念演示",
+      "images": [],
+      "role": "角色设定 / 视觉延展",
+      "tools": "Illustrator",
+      "sortOrder": 40,
+      "status": "published",
+      "demo": true
+    },
+    {
+      "slug": "blue-hour",
+      "title": "蓝色时刻 · 城市切片",
+      "year": "2025",
+      "category": "illustration",
+      "summary": "记录天色变暗前，城市最柔软的一刻。",
+      "description": "演示项目：用几何形状和冷暖色块组织城市的远近层次。\n真实案例可补充草图、构图推敲和系列作品。\n当前为矢量构图示意，用于检验插画类别的横版呈现。",
+      "cover": "assets/images/works-demo/blue-hour.svg",
+      "alt": "蓝色时刻城市几何插画演示",
+      "images": [],
+      "role": "构图 / 插画",
+      "tools": "Illustrator / Procreate",
+      "sortOrder": 50,
+      "status": "published",
+      "demo": true
+    },
+    {
+      "slug": "daily-objects",
+      "title": "日常物件 · 线上橱窗",
+      "year": "2024",
+      "category": "commerce",
+      "summary": "把材质、尺寸与用途，讲得更直观。",
+      "description": "演示项目：将商品信息拆成视觉焦点、关键卖点与细节说明。\n用统一的版式和色彩建立系列感，让浏览更轻松。\n不包含真实销售数据；请用自己的项目背景与结果替换。",
+      "cover": "assets/images/works-demo/daily.svg",
+      "alt": "日常物件电商视觉概念演示",
+      "images": [],
+      "role": "电商视觉 / 信息设计",
+      "tools": "Photoshop / Figma",
+      "sortOrder": 60,
+      "status": "published",
+      "demo": true
+    },
+    {
+      "slug": "form-lamp",
+      "title": "FORM · 光的形状",
+      "year": "2024",
+      "category": "product",
+      "summary": "让形态与光线，一起说明产品。",
+      "description": "演示项目：以一盏虚构台灯为对象，探索形态、留白与光影。\n当前封面是矢量示意；接入真实案例时可替换为建模渲染图和局部细节图。\n不将这张示意图标记为实际三维渲染成果。",
+      "cover": "assets/images/works-demo/form.svg",
+      "alt": "FORM 台灯产品构图演示",
+      "images": [],
+      "role": "产品表现 / 构图",
+      "tools": "Blender / Photoshop",
+      "sortOrder": 70,
+      "status": "published",
+      "demo": true
+    }
+  ]
+}

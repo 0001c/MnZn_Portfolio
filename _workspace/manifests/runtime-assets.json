@@ -1,0 +1,112 @@
+[
+  {
+    "source": "assets/portfolio-content.css",
+    "output": "assets/portfolio-content.5c58c482505d.css",
+    "bytes": 21357
+  },
+  {
+    "source": "assets/images/介绍.webp",
+    "output": "assets/images/介绍.8efacd3adc61.webp",
+    "bytes": 369892
+  },
+  {
+    "source": "assets/images/posters/intro-poster.webp",
+    "output": "assets/images/posters/intro-poster.b85101892616.webp",
+    "bytes": 52544
+  },
+  {
+    "source": "assets/videos/主视频-scroll.mp4",
+    "output": "assets/videos/主视频-scroll.eb98f962427a.mp4",
+    "bytes": 16226944
+  },
+  {
+    "source": "assets/images/posters/main-poster.webp",
+    "output": "assets/images/posters/main-poster.f88823b013d2.webp",
+    "bytes": 77306
+  },
+  {
+    "source": "assets/videos/尾部视频-scroll.mp4",
+    "output": "assets/videos/尾部视频-scroll.2c2f71c5c04c.mp4",
+    "bytes": 9167204
+  },
+  {
+    "source": "assets/images/posters/outro-poster.webp",
+    "output": "assets/images/posters/outro-poster.c976ba4eeb89.webp",
+    "bytes": 47308
+  },
+  {
+    "source": "assets/videos/尾部视频-loop.mp4",
+    "output": "assets/videos/尾部视频-loop.9c778d2783cd.mp4",
+    "bytes": 899653
+  },
+  {
+    "source": "assets/images/posters/working-poster.webp",
+    "output": "assets/images/posters/working-poster.a8b925f70345.webp",
+    "bytes": 39930
+  },
+  {
+    "source": "assets/videos/主视频.mp4",
+    "output": "assets/videos/主视频.8b690ba70ba7.mp4",
+    "bytes": 5704741
+  },
+  {
+    "source": "assets/images/人物九方向-3x3.webp",
+    "output": "assets/images/人物九方向-3x3.14d1539d2ae1.webp",
+    "bytes": 1609476
+  },
+  {
+    "source": "assets/videos/尾部视频.mp4",
+    "output": "assets/videos/尾部视频.004b85d4f394.mp4",
+    "bytes": 2078470
+  },
+  {
+    "source": "assets/portfolio-model.js",
+    "output": "assets/portfolio-model.eae8548d1c27.js",
+    "bytes": 4079
+  },
+  {
+    "source": "assets/images/works-demo/orbit.svg",
+    "output": "assets/images/works-demo/orbit.50273d5a077f.svg",
+    "bytes": 1801
+  },
+  {
+    "source": "assets/images/works-demo/summer.svg",
+    "output": "assets/images/works-demo/summer.6c4a1436e815.svg",
+    "bytes": 1052
+  },
+  {
+    "source": "assets/images/works-demo/still.svg",
+    "output": "assets/images/works-demo/still.543871fd60cc.svg",
+    "bytes": 1362
+  },
+  {
+    "source": "assets/images/works-demo/momo.svg",
+    "output": "assets/images/works-demo/momo.9976967028b8.svg",
+    "bytes": 1327
+  },
+  {
+    "source": "assets/images/works-demo/blue-hour.svg",
+    "output": "assets/images/works-demo/blue-hour.7618c0373721.svg",
+    "bytes": 939
+  },
+  {
+    "source": "assets/images/works-demo/daily.svg",
+    "output": "assets/images/works-demo/daily.ff9669ea2a73.svg",
+    "bytes": 1254
+  },
+  {
+    "source": "assets/images/works-demo/form.svg",
+    "output": "assets/images/works-demo/form.dff6b5358aad.svg",
+    "bytes": 1465
+  },
+  {
+    "source": "content/portfolio.json",
+    "output": "content/portfolio.55bb6f002dfe.json",
+    "bytes": 7245
+  },
+  {
+    "source": "assets/portfolio-content.js",
+    "output": "assets/portfolio-content.e2c94b803d08.js",
+    "bytes": 23685
+  }
+]

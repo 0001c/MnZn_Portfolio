@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>作品集内容编辑</title><link rel="stylesheet" href="assets/content-editor.css"></head>
+<body>
+  <header><div><p class="kicker">KANG / CONTENT</p><h1>把你的故事放进来。</h1><p>个人资料、履历和作品，集中在一份内容文件里。</p></div><a class="button secondary" href="/" target="_blank" rel="noopener">查看网站 ↗</a></header>
+  <div class="toolbar"><button id="open-file" class="button secondary">打开现有内容文件</button><button id="save-file" class="button">保存到内容文件</button><button id="download-file" class="button secondary">下载 JSON</button><span id="editor-status" role="status">正在读取…</span><input id="import-file" type="file" accept=".json,application/json" hidden></div>
+  <aside><strong>第一次录入</strong><p>先将作品图片复制到项目的 <code>assets/images/works/</code> 文件夹；下方填写例如 <code>assets/images/works/项目名/cover.jpg</code>。保存时选择 <code>content/portfolio.json</code>，之后刷新网站。此编辑页只在本机保存文件，线上网站需重新同步文件。</p></aside>
+  <p id="editor-error" role="alert" hidden></p>
+  <form id="editor-form">
+    <section><div class="section-title"><h2>01 / 个人资料</h2><p>填写真实信息后，关闭演示标记。</p></div><div id="profile-fields" class="field-grid"></div></section>
+    <section><div class="section-title"><h2>02 / 履历</h2><button type="button" class="button secondary" id="add-experience">＋ 添加经历</button></div><p class="hint">点击卡片标题展开或收起。按这里的先后顺序显示。草稿不会出现在网站；年份可写“2024 — 至今”。</p><div id="experience-fields" class="entry-list"></div></section>
+    <section><div class="section-title"><h2>03 / 作品</h2><button type="button" class="button secondary" id="add-project">＋ 添加作品</button></div><p class="hint">点击卡片标题展开或收起，新增和复制的卡片自动展开。按分类顺序集中展示，同类作品按排序数字从小到大显示。封面建议 16:9，详情大图保留原比例。</p><div id="project-fields" class="entry-list"></div></section>
+  </form>
+  <footer>支持图片作品、多张详情图与作品链接（每行一个）。文件保存前会检查必填内容、分类、路径与重复标识。<a href="../docs/个人内容快速录入.md" target="_blank">完整录入说明 ↗</a></footer>
+  <script src="../../assets/portfolio-model.js"></script><script src="assets/content-editor.js"></script>
+</body></html>

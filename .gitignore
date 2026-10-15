@@ -1,0 +1,28 @@
+# Generated output and local dependencies
+/dist/
+node_modules/
+*.log
+.env
+.env.*
+!.env.example
+
+# Keep current editor and the scripts required by package.json
+/_workspace/*
+!/_workspace/editor/
+!/_workspace/tools/
+/_workspace/tools/*
+!/_workspace/tools/build-static.cjs
+!/_workspace/tools/verify-scrollytelling.cjs
+!/_workspace/tests/
+/_workspace/tests/*
+!/_workspace/tests/static-build.test.cjs
+!/_workspace/tests/story-media.test.cjs
+!/_workspace/tests/pointer-video.test.cjs
+!/_workspace/tests/intro-depth.test.cjs
+!/_workspace/docs/
+/_workspace/docs/*
+!/_workspace/docs/个人内容快速录入.md
+!/_workspace/docs/章节加载与版本缓存.md
+!/_workspace/manifests/
+/_workspace/manifests/*
+!/_workspace/manifests/runtime-assets.json

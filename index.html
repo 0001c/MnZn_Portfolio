@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#dce0e6">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23dce0e6'/%3E%3Ctext x='6' y='26' font-family='Arial' font-weight='900' font-size='27' fill='%2317191d'%3EK%3C/text%3E%3C/svg%3E">
+  <meta name="description" content="一个关于好奇、细节与相遇的设计师作品集。向下探索，向上回看。">
+  <title>KANG. — Design with feeling</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --silver: #dce0e6; --paper: #eef1f5; --ink: #17191d; --muted: #454b55; --line: #59616d;
+      --gutter: clamp(20px, 4vw, 80px); --fade: 500ms; --vh: 1vh;
+      --ellipse-width: min(72vw, 113.78vh); --ellipse-height: min(40.5vw, 64vh); --ellipse-y: 52%;
+      --mouse-x: 0px; --mouse-y: 0px;
+      --tilt-x: 0deg; --tilt-y: 0deg;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
+      font-synthesis: none; color: var(--ink); background: var(--silver);
+    }
+    * { box-sizing: border-box; }
+    html { overscroll-behavior-y: none; scrollbar-width: none; }
+    html::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    body { margin: 0; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--ink); outline-offset: 7px; }
+    ::selection { background: var(--ink); color: var(--paper); }
+    .skip-link { position: fixed; top: 12px; left: var(--gutter); z-index: 20; padding: 12px 18px; background: var(--paper); transform: translateY(-180%); }
+    .skip-link:focus { transform: translateY(0); }
+    .stage { position: fixed; inset: 0; overflow: hidden; pointer-events: none; background: var(--silver); }
+    .silver-plate { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(135deg, #f8f9fc, #b9bec7 28%, #eef1f5 52%, #858d99 76%, #dce0e6); }
+    .silver-plate img { position: absolute; left: 0; top: 0; width: 340%; height: 100%; object-fit: cover; object-position: left center; }
+    .silver-plate::after { content: ""; position: absolute; inset: 0; background: #eef1f5; opacity: .16; }
+    .video-layer { position: fixed; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity var(--fade) ease; }
+    .video-layer.is-visible { opacity: 1; }
+    video.video-layer { object-fit: cover; object-position: 50% 50%; }
+
+    /* 开启 3D 舞台透视 */
+    .intro-layer {
+      z-index: 3;
+      perspective: 1100px;
+      perspective-origin: 50% 50%;
+    }
+    #main-layer { z-index: 1; }
+    .main-window { position: absolute; background: #000; transform: translate(-50%, -50%); overflow: hidden; }
+    #main-video { position: absolute; object-fit: contain; transform: translate(-50%, -50%); }
+    #outro-video { z-index: 2; }
+
+    /* 外层负责鼠标位移跟随与 3D 鼠标倾角响应 */
+    .intro-orbit {
+      position: absolute;
+      left: 50%;
+      top: var(--ellipse-y);
+      width: var(--ellipse-width);
+      height: var(--ellipse-height);
+      transform-style: preserve-3d;
+      transform: translate3d(calc(-50% + var(--mouse-x)), calc(-50% + var(--mouse-y)), 0)
+                 rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+      will-change: transform;
+    }
+
+    /* 内层负责自主呼吸感 + 3D 卡片轻微对角线前后摇摆 */
+    .intro-card-rig {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      animation: diagonal-float 6.8s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    @keyframes diagonal-float {
+      0%, 100% {
+        /* 沿对角轴 (1, 1, 0) 前倾微晃 + 呼吸微缩 */
+        transform: rotate3d(1, 1, 0, -2.6deg) rotateZ(-0.35deg) translateZ(0px) scale(0.992);
+      }
+      50% {
+        /* 沿对角轴反向后仰微晃 + 呼吸舒展 */
+        transform: rotate3d(1, 1, 0, 2.6deg) rotateZ(0.35deg) translateZ(14px) scale(1.014);
+      }
+    }
+
+    .intro-window {
+      position: absolute;
+      inset: 11%;
+      background: #050608;
+      clip-path: ellipse(50% 50% at 50% 50%);
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(23, 25, 29, 0.22);
+    }
+    .intro-window .intro-poster, .intro-window canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #050608;
+    }
+    #intro-canvas { z-index: 2; pointer-events: none; opacity: 0; transition: opacity 260ms ease; }
+    #intro-canvas.is-ready { opacity: 1; }
+
+    /* 渐变遮罩光环：增加独立呼吸缩放与柔和过渡 */
+    .intro-halo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      transform-origin: 50% 50%;
+      animation: halo-breathe 4.6s ease-in-out infinite;
+      will-change: transform, opacity;
+    }
+
+    @keyframes halo-breathe {
+      0%, 100% {
+        transform: scale(0.994);
+        opacity: 0.94;
+      }
+      50% {
+        transform: scale(1.016);
+        opacity: 1;
+      }
+    }
+
+    .header { position: fixed; z-index: 8; top: 0; left: 0; width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 24px; padding: max(26px, env(safe-area-inset-top)) var(--gutter) 20px; }
+    .header::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(#eef1f5e8, #eef1f5ac 55%, #eef1f500); }
+    .logo { font-family: Impact, Haettenschweiler, "Arial Narrow", sans-serif; font-size: 28px; letter-spacing: -.04em; line-height: 1; width: fit-content; }
+    .nav { display: flex; gap: clamp(20px, 3vw, 48px); align-items: center; }
+    .nav a { position: relative; display: inline-flex; align-items: center; gap: 7px; min-height: 36px; font-size: 11px; white-space: nowrap; }
+    .nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform 200ms; }
+    .nav a:hover::after, .nav a[aria-current="step"]::after { transform: scaleX(1); }
+    .nav small { font-size: 9px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .identity { margin: 0; font-size: 10px; line-height: 1.6; text-align: right; letter-spacing: .08em; }
+    .identity span { display: block; letter-spacing: 0; color: var(--muted); }
+    .copy-stage { position: fixed; z-index: 5; inset: 0; pointer-events: none; }
+    .chapter { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr) minmax(0, .95fr); gap: 2vw; align-items: center; padding: 100px var(--gutter) 110px; opacity: 0; transform: translateY(12px); transition: opacity var(--fade) ease, transform var(--fade) ease; }
+    .chapter.is-active { opacity: 1; transform: translateY(0); visibility: visible; }
+    .chapter:not(.is-active) { visibility: hidden; transition: opacity var(--fade) ease, transform var(--fade) ease, visibility 0s var(--fade); }
+    .copy-left { grid-column: 1; align-self: center; position: relative; }
+    .copy-right { grid-column: 3; position: relative; align-self: center; text-align: right; padding-block: 20px; }
+    .reading-wings { position: absolute; z-index: 4; inset: 0; opacity: 1; background: linear-gradient(90deg, #eef1f5ed 0%, #eef1f5d9 16%, #eef1f500 34%, #eef1f500 72%, #eef1f5c9 88%, #eef1f5ed 100%); transition: opacity var(--fade); }
+    body[data-mode="intro"] .reading-wings { opacity: 0; }
+    .eyebrow { display: flex; gap: 12px; align-items: center; margin: 0 0 22px; font-size: 10px; letter-spacing: .14em; line-height: 1.6; }
+    .eyebrow::before { content: ""; width: 24px; height: 1px; background: currentColor; }
+    .display { font-family: Impact, Haettenschweiler, "Arial Narrow", sans-serif; font-weight: 900; font-size: clamp(54px, 6.5vw, 108px); line-height: .96; letter-spacing: -.015em; margin: 0; }
+    .display span { display: block; width: 133.33%; transform: scaleX(.75); transform-origin: left; }
+    .display .outline { color: var(--ink); }
+    .subtitle { margin: 0 0 22px; font-size: 16px; font-weight: 800; line-height: 1.25; letter-spacing: -.02em; }
+    .emotion { margin: 0 0 16px; font-size: clamp(13px, 1.05vw, 16px); line-height: 2; text-wrap: pretty; }
+    .note { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.8; letter-spacing: .04em; }
+    .action { display: inline-flex; justify-content: space-between; align-items: center; gap: 24px; padding: 15px 0 9px; margin-top: 24px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font-size: 11px; cursor: pointer; pointer-events: auto; text-align: left; }
+    .action .arrow { font-size: 20px; line-height: 1; transition: transform 200ms; }
+    .action:hover .arrow { transform: translate(3px, 3px); }
+    .first-action { transition: opacity 200ms; }
+    body:not([data-mode="intro"]) .first-action { opacity: 0; pointer-events: none; visibility: hidden; }
+    .outro-action { display: none; }
+    body[data-mode="outro"] .outro-action { display: inline-flex; }
+    .scroll-cue { position: fixed; z-index: 6; bottom: 85px; left: 50%; transform: translateX(-50%); margin: 0; font-size: 10px; line-height: 1.8; color: var(--ink); text-align: center; letter-spacing: .09em; opacity: 0; transition: opacity var(--fade); pointer-events: none; }
+    .scroll-cue::before { content: ""; position: absolute; z-index: -1; inset: -6px -16px; background: var(--paper); opacity: .85; filter: blur(16px); }
+    body[data-mode="intro"] .scroll-cue { opacity: 1; }
+    .scroll-cue span { display: block; margin-top: 6px; color: var(--ink); font-size: 18px; }
+    .hud { position: fixed; z-index: 8; left: 0; bottom: 0; width: 100%; display: grid; grid-template-columns: 190px minmax(0, 1fr) 190px; gap: 34px; align-items: center; padding: 25px var(--gutter) max(26px, env(safe-area-inset-bottom)); font-size: 10px; }
+    .hud::before { content: ""; position: absolute; inset: -20px 0 0; z-index: -1; background: linear-gradient(#eef1f500, #eef1f5bd 45%, #eef1f5ee); }
+    .chapter-label { display: flex; gap: 16px; align-items: center; }
+    .chapter-label b { font-weight: 400; font-variant-numeric: tabular-nums; }
+    .progress { position: relative; height: 1px; background: #59616d55; }
+    .progress-fill { position: absolute; inset: 0; background: var(--ink); transform: scaleX(0); transform-origin: left; }
+    .progress-dot { position: absolute; top: -3px; left: 0; width: 7px; height: 7px; background: var(--ink); border-radius: 50%; transform: translateX(-50%); }
+    .hud-right { display: flex; justify-content: flex-end; gap: 20px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .hud-right strong { color: var(--ink); font-weight: 400; }
+    #scroll-track { height: 1000vh; min-height: 100vh; }
+    .timeline-anchor { position: absolute; width: 1px; height: 1px; }
+    .media-status { position: fixed; z-index: 15; left: 50%; bottom: 115px; transform: translateX(-50%); max-width: calc(100% - 40px); margin: 0; padding: 12px 16px; background: var(--paper); border: 1px solid #59616d55; font-size: 12px; text-align: center; }
+    .media-status[hidden] { display: none; }
+    .noscript { position: fixed; z-index: 20; left: var(--gutter); right: var(--gutter); bottom: 110px; padding: 20px; background: var(--paper); color: var(--ink); }
+    @media (min-width: 1800px) { .chapter { grid-template-columns: 1fr 2fr 1fr; } }
+    @media (max-width: 900px) {
+      .identity { display: none; }
+      .header { grid-template-columns: 1fr auto; }
+      .chapter { grid-template-columns: 1fr 1.65fr .95fr; gap: 16px; }
+      .display { font-size: clamp(44px, 7.4vw, 70px); }
+      .emotion { font-size: 12px; }
+      .subtitle { font-size: 13px; }
+      .hud { grid-template-columns: 145px 1fr 100px; gap: 20px; }
+      .hud-right .direction { display: none; }
+    }
+    @media (max-width: 600px), (max-width: 900px) and (orientation: portrait) {
+      :root { --ellipse-width: min(112vw, 71.11vh); --ellipse-height: min(63vw, 40vh); --ellipse-y: 49%; }
+      .header { padding-top: max(20px, env(safe-area-inset-top)); align-items: center; gap: 16px; }
+      .logo { font-size: 25px; }
+      .nav { gap: 17px; }
+      .nav a { font-size: 10px; min-height: 44px; }
+      .nav small { display: none; }
+      .chapter { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; gap: 0; padding-top: max(100px, calc(12 * var(--vh))); padding-bottom: max(104px, calc(12 * var(--vh))); }
+      .copy-left { grid-column: 1; grid-row: 1; align-self: start; }
+      .copy-right { grid-column: 1; grid-row: 3; text-align: left; padding: 0; max-width: 100%; }
+      .reading-wings { background: linear-gradient(#eef1f5c9 0%, #eef1f5e8 20%, #eef1f500 37%, #eef1f500 58%, #eef1f5ed 73%, #eef1f5e8 100%); }
+      body[data-mode="intro"] .reading-wings { opacity: .35; }
+      .eyebrow { margin-bottom: 14px; font-size: 9px; }
+      .display { font-size: clamp(42px, 11.8vw, 68px); line-height: .96; }
+      .display span { display: inline-block; width: auto; transform: scaleX(.8); transform-origin: left; margin-right: -.18em; }
+      .display span::after { content: " "; white-space: pre; }
+      .display span:last-child { display: block; }
+      .chapter[data-start="2.4"] .display span:last-child { display: inline-block; }
+      .subtitle { font-size: 12px; margin-bottom: 12px; letter-spacing: .08em; }
+      .emotion { font-size: 13px; line-height: 1.9; margin-bottom: 8px; max-width: 27em; }
+      .note { font-size: 9px; }
+      .action { margin-top: 12px; padding-top: 10px; }
+      .scroll-cue { display: none; }
+      #main-video { object-position: var(--video-focus, 50%) center; }
+      #outro-video { object-position: var(--outro-focus, 75%) center; }
+      .hud { grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; padding-top: 20px; font-size: 9px; }
+      .chapter-label { gap: 9px; }
+      .hud-right { font-size: 9px; }
+      .media-status { bottom: 72px; font-size: 11px; }
+    }
+    @media (max-height: 580px) and (min-width: 601px) {
+      .header { padding-top: 18px; }
+      .chapter { padding-block: 85px; }
+      .display { font-size: min(8vw, 68px); }
+      .eyebrow, .subtitle { margin-bottom: 12px; }
+      .action { margin-top: 8px; }
+      .scroll-cue { display: none; }
+    }
+    @media (min-width: 601px) and (max-width: 900px) and (orientation: portrait) {
+      .chapter { padding-top: 112px; }
+      .display { font-size: 54px; }
+      .copy-right { max-width: 360px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      :root { --fade: 1ms; }
+      .chapter, .action .arrow { transform: none; }
+      .intro-orbit { will-change: auto; }
+      .intro-card-rig, .intro-halo { animation: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="assets/portfolio-content.css">
+</head>
+<body data-mode="intro">
+  <a class="skip-link" href="#story">跳至故事</a>
+  <div class="stage" aria-hidden="true">
+    <div class="silver-plate"><img src="assets/images/介绍.webp" alt="" fetchpriority="high"></div>
+    <div class="video-layer intro-layer is-visible" id="intro-layer">
+      <div class="intro-orbit">
+        <div class="intro-card-rig">
+          <div class="intro-window" tabindex="0" aria-label="移动鼠标或按住滑动控制人物视线；也可使用方向键，Home回正" style="pointer-events:auto;touch-action:none">
+            <img class="intro-poster" src="assets/images/posters/intro-poster.webp" alt="" aria-hidden="true">
+            <!-- 3x3 九方向雪碧图实时插值画布 -->
+            <canvas id="intro-canvas" width="1280" height="720"></canvas>
+          </div>
+          <!-- 中心开孔；由内圈纯黑 (#040507) 向外圈深炭灰 (#252a34 ~ #383f4d) 柔和过渡，带呼吸感 -->
+          <svg class="intro-halo" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+            <defs>
+              <radialGradient id="halo-alpha">
+                <stop offset="0%" stop-color="#040507" stop-opacity="0"/>
+                <stop offset="75.5%" stop-color="#040507" stop-opacity="0"/>
+                <stop offset="77.8%" stop-color="#050608" stop-opacity="0.98"/>
+                <stop offset="82.5%" stop-color="#14171f" stop-opacity="0.90"/>
+                <stop offset="87.5%" stop-color="#242933" stop-opacity="0.65"/>
+                <stop offset="92.5%" stop-color="#323846" stop-opacity="0.34"/>
+                <stop offset="96.8%" stop-color="#3e4554" stop-opacity="0.09"/>
+                <stop offset="100%" stop-color="#454b55" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="500" cy="500" rx="500" ry="500" fill="url(#halo-alpha)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <!-- 主视频始终暂停。所有seek均来自滚动rAF；无autoplay/loop属性。 -->
+    <div class="video-layer" id="main-layer"><div class="main-window" id="main-window">
+      <video id="main-video" src="assets/videos/主视频-scroll.mp4" poster="assets/images/posters/main-poster.webp" muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+    </div></div>
+    <video class="video-layer" id="outro-video" data-src="assets/videos/尾部视频-scroll.mp4" poster="assets/images/posters/outro-poster.webp" muted playsinline webkit-playsinline preload="none" disablepictureinpicture></video>
+    <video class="video-layer" id="work-video" data-src="assets/videos/尾部视频-loop.mp4" poster="assets/images/posters/working-poster.webp" muted playsinline webkit-playsinline preload="none" disablepictureinpicture></video>
+    <div class="reading-wings"></div>
+  </div>
+  <header class="header">
+    <a class="logo" href="#chapter-1" data-jump="0" aria-label="KANG，回到首页">KANG.</a>
+    <nav class="nav" aria-label="故事章节">
+      <a href="#chapter-1" data-jump="0" aria-current="step"><small>01</small> 相遇</a>
+      <a href="#chapter-2" data-jump="3.5"><small>02</small> 灵感成形</a>
+      <a href="#chapter-3" data-jump="6.7"><small>03</small> 作品开口</a>
+    </nav>
+    <p class="identity">INDEPENDENT DESIGNER<span>用好奇心，回应这个世界。</span></p>
+  </header>
+  <main id="scroll-track" aria-label="设计师介绍，滚动探索三个章节">
+    <div id="chapter-1" class="timeline-anchor"></div>
+    <div id="chapter-2" class="timeline-anchor"></div>
+    <div id="chapter-3" class="timeline-anchor"></div>
+    <div class="copy-stage" id="story" tabindex="-1">
+      <section class="chapter is-active" data-start="0" data-end="2.4" aria-labelledby="title-1">
+        <div class="copy-left">
+          <p class="eyebrow">01 / A FIRST HELLO</p>
+          <h1 class="display" id="title-1"><span>DESIGN.</span><span>WITH</span><span class="outline">FEELING.</span></h1>
+          <a class="action first-action" href="#chapter-2" data-jump="3.5"><span>向下，认识我</span><span class="arrow" aria-hidden="true">↓</span></a>
+        </div>
+        <div class="copy-right">
+          <h2 class="subtitle">A CURIOUS MIND.</h2>
+          <p class="emotion">把藏不住的好奇，<br>做成一眼就记住的设计。</p>
+          <p class="note">设计始于一次认真看见。<br>欢迎走进我的视角。</p>
+        </div>
+      </section>
+      <section class="chapter chapter--content chapter--bio" data-start="2.4" data-end="6.7" aria-labelledby="title-2" aria-hidden="true" inert>
+        <div class="content-heading">
+          <p class="eyebrow">02 / FROM SPARK TO FORM</p>
+          <h2 class="display" id="title-2"><span>DESIGN.</span><span>BUILD.</span><span>REPEAT.</span></h2>
+          <h3 id="bio-name" class="bio-name">KANG.</h3>
+          <p class="bio-intro" id="profile-bio">正在读取个人介绍。</p>
+          <div class="skill-list" id="skill-list" aria-label="专业能力"></div>
+          <a class="action" href="#chapter-3" data-jump="6.7"><span>看看我的作品</span><span class="arrow" aria-hidden="true">↗</span></a>
+        </div>
+        <div class="bio-content" aria-label="个人介绍与履历">
+          <div class="content-topline"><span>SCROLL THROUGH THE YEARS</span><span class="demo-label" id="bio-demo">演示履历</span></div>
+          <div class="experience-year" id="experience-year" aria-hidden="true">2018</div>
+          <ol class="experience-list" id="experience-list"></ol>
+          <div class="experience-footer"><p class="emotion">从一次灵感的闪光，<br>到每一处细节的认真。</p><span id="experience-counter" aria-live="polite"></span></div>
+        </div>
+      </section>
+      <section class="chapter chapter--content chapter--works" data-start="6.7" data-end="10" aria-labelledby="title-3" aria-hidden="true" inert>
+        <div class="works-content content-surface">
+          <div class="content-topline"><span>03 / SELECTED WORKS</span><span class="demo-label" id="works-demo">演示作品</span></div>
+          <h2 class="display" id="title-3">LET WORK SPEAK.</h2>
+          <p class="emotion">让作品先开口，<br>也让下一次相遇有了期待。</p>
+          <div class="work-categories" id="work-categories" role="group" aria-label="按分类跳至第一件作品"></div>
+          <div id="work-preview"><p class="content-message">正在读取作品。</p></div>
+          <div class="work-controls"><div class="work-status"><p class="work-counter" id="work-counter" aria-live="polite"></p><span class="work-hint" id="work-hint">点击停驻 · 再次点击展开</span></div><div><button class="text-button flow-toggle" id="work-flow" aria-label="暂停作品流动">暂停流动 Ⅱ</button><button class="icon-button" id="work-prev" aria-label="向左旋转卡牌圆环">←</button><button class="icon-button" id="work-next" aria-label="向右旋转卡牌圆环">→</button></div></div>
+          <div class="works-footer"><a class="contact-link" id="profile-contact" hidden>聊聊下一个项目 ↗</a><a href="#chapter-1" data-jump="0">再走一遍 ↑</a></div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <p class="scroll-cue">移动鼠标，打个招呼。<br>向下滚动 · 展开故事<span aria-hidden="true">↓</span></p>
+  <footer class="hud" aria-label="故事进度">
+    <div class="chapter-label"><b id="chapter-number">01 / 03</b><span id="chapter-name">相遇</span></div>
+    <div class="progress" role="progressbar" aria-label="滚动故事进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-fill"></div><div class="progress-dot"></div>
+    </div>
+    <div class="hud-right"><span class="direction">向下探索</span><strong id="time-label">00:00 / 00:10</strong></div>
+  </footer>
+  <p class="media-status" id="media-status" role="status" hidden><span></span></p>
+  <noscript><p class="noscript">请启用 JavaScript 以体验滚动叙事。<a href="assets/videos/主视频.mp4">也可以直接观看介绍视频 ↗</a></p></noscript>
+  <script>
+    'use strict';
+    (() => {
+      const main = document.getElementById('main-video');
+      const introCanvas = document.getElementById('intro-canvas');
+      const ctx = introCanvas.getContext('2d');
+      const outro = document.getElementById('outro-video');
+      const workVideo = document.getElementById('work-video');
+      const introLayer = document.getElementById('intro-layer');
+      const mainLayer = document.getElementById('main-layer');
+      const mainWindow = document.getElementById('main-window');
+      const track = document.getElementById('scroll-track');
+      const chapters = [...document.querySelectorAll('.chapter')];
+      const navLinks = [...document.querySelectorAll('.nav a')];
+      const progressBar = document.querySelector('.progress');
+      const fill = document.querySelector('.progress-fill');
+      const dot = document.querySelector('.progress-dot');
+      const timeLabel = document.getElementById('time-label');
+      const direction = document.querySelector('.direction');
+      const status = document.getElementById('media-status');
+      const statusText = status.querySelector('span');
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+      const root = document.documentElement;
+      const names = ['相遇', '灵感成形', '作品开口'];
+      const layers = { intro: introLayer, main: mainLayer, outro };
+      // 头部特征点校准：等比放大主视频末段，使其与尾部首帧衔接。
+      const handoff = { scale: 1.045470953, x: -15.007568359 / 1280, y: -1.500579834 / 720 };
+      const secondPageTime = 3.5;
+      const fullScreenSourceTime = 3.5;
+      const thirdPageTime = 6.7;
+      let duration = 10, outroDuration = 10, maxScroll = 1, mode = 'intro', chapterIndex = 0;
+      let progress = 0, smoothTime = 0, lastTick = performance.now(), lastSeek = 0, lastScroll = 0;
+      let frameId = 0, smoothOutroTime = 0, lastOutroSeek = 0;
+      let introSnapTimer = 0, introSnapArmed = false, scrollPosition = window.scrollY;
+      let workSnapTimer = 0, working = false, workFallback = false, workFailed = false;
+      let workCompletion = null;
+      let mediaReady = false, mainFallback = false, outroFallback = false, outroFailed = false, fatalError = false;
+      let thirdPageMediaRequested = false;
+      function loadThirdPageMedia() {
+        if (thirdPageMediaRequested) return;
+        thirdPageMediaRequested = true;
+        for (const video of [outro, workVideo]) {
+          video.preload = 'auto';
+          video.src = video.dataset.src;
+          video.load();
+        }
+      }
+      let pointerX = 0, pointerY = 0;
+      let smoothGazeX = 0, smoothGazeY = 0;
+      let introFailed = false;
+      let trackingPointer = null;
+      let introImageWidth = 0, introCenterX = 0, introCenterY = 0, introWindowWidth = 0, introWindowHeight = 0;
+      const pointerSurface = document.querySelector('.intro-window');
+
+      /**
+       * ============================================================================
+       * 加载单张 3x3 九宫格雪碧图 ("assets/images/人物九方向-3x3.webp") 并切分为 9 个高清方位帧
+       * ============================================================================
+       */
+      const poseFrames = {
+        upLeft: null,   up: null,     upRight: null,
+        left: null,     center: null, right: null,
+        downLeft: null, down: null,   downRight: null
+      };
+      let use2DGazeEngine = false;
+
+      function load3x3SpriteSheet() {
+        const candidatePaths = [
+          'assets/images/人物九方向-3x3.webp'
+        ];
+        const sheet = new Image();
+        let idx = 0;
+
+        sheet.onload = () => {
+          const cellW = sheet.naturalWidth / 3;
+          const cellH = sheet.naturalHeight / 3;
+          const insetX = Math.min(3, Math.max(1, Math.round(cellW * 0.004)));
+          const insetY = Math.min(3, Math.max(1, Math.round(cellH * 0.004)));
+          const sw = cellW - insetX * 2;
+
+          introCanvas.width = Math.round(cellW * 2);
+          introCanvas.height = Math.round(cellH * 2);
+
+          const gridMap = [
+            ['upLeft',   0, 0], ['up',     0, 1], ['upRight',   0, 2],
+            ['left',     1, 0], ['center', 1, 1], ['right',     1, 2],
+            ['downLeft', 2, 0], ['down',   2, 1], ['downRight', 2, 2]
+          ];
+
+          gridMap.forEach(([key, row, col]) => {
+            const off = document.createElement('canvas');
+            off.width = introCanvas.width;
+            off.height = introCanvas.height;
+            const octx = off.getContext('2d');
+            const sx = col * cellW + insetX;
+            // 正面照片在九宫格内有16px上下填黑，裁掉后等比cover，避免拉伸脸部。
+            const cropY = key === 'center' ? 16 : insetY;
+            const sy = row * cellH + cropY;
+            const cropH = cellH - cropY * 2;
+            const cover = Math.max(off.width / sw, off.height / cropH);
+            const drawW = sw * cover, drawH = cropH * cover;
+            octx.drawImage(sheet, sx, sy, sw, cropH, (off.width - drawW) / 2, (off.height - drawH) / 2, drawW, drawH);
+            poseFrames[key] = off;
+          });
+
+          use2DGazeEngine = true;
+          introFailed = false;
+          hideStatus();
+          introCanvas.classList.add('is-ready');
+          wake();
+        };
+
+        sheet.onerror = () => {
+          idx++;
+          if (idx < candidatePaths.length) {
+            sheet.src = candidatePaths[idx];
+          } else {
+            introFailed = true;
+            if (mode === 'intro') showStatus('人物图集未能加载，滚动后可继续浏览。');
+          }
+        };
+
+        sheet.src = candidatePaths[0];
+      }
+      load3x3SpriteSheet();
+
+      /**
+       * 窄过渡带高清晰度渲染器 (Crisp-Plateau 3x3 Renderer)
+       * ----------------------------------------------------------------------------
+       * 关键改进：大幅压缩两帧之间的半透明重叠区间！
+       * - 当偏离度在 [0.00 ~ 0.28] 时：权重锁定为 0（100% 纯净显示正中帧，无重影）
+       * - 当偏离度在 [0.28 ~ 0.50] 时：仅在这 22% 的窄带内用五次平滑曲线快速完成过渡
+       * - 当偏离度在 [0.50 ~ 1.00] 时：权重锁定为 1（100% 纯净显示目标方向帧，无重影）
+       * 让画面在接近 80% 的鼠标位置上都呈现出 100% 锐利清晰的单张原画！
+       */
+      function crispSnapCurve(val) {
+        const abs = Math.abs(val);
+        const low = 0.28;  // 中心清晰区半径
+        const high = 0.50; // 外围清晰区起点（满偏转完全锁定的阈值）
+        if (abs <= low) return 0;
+        if (abs >= high) return 1;
+        const t = (abs - low) / (high - low);
+        // 五次多项式 S 曲线 (Quintic Hermite)，两端导数为 0，过渡极快且无顿挫
+        return t * t * t * (t * (t * 6 - 15) + 10);
+      }
+
+      function render2DGaze(gx, gy) {
+        if (!use2DGazeEngine || !poseFrames.center) return;
+        const cw = introCanvas.width, ch = introCanvas.height;
+        ctx.clearRect(0, 0, cw, ch);
+
+        // 连续的微视差平移：即便在画面锁定为 100% 清晰单帧的区域，依然有细腻的跟手物理位移！
+        const shiftX = -gx * cw * 0.016;
+        const shiftY = -gy * ch * 0.016;
+        const scale = 1.034;
+        const drawW = cw * scale, drawH = ch * scale;
+        const dx = (cw - drawW) / 2 + shiftX;
+        const dy = (ch - drawH) / 2 + shiftY;
+
+        // 计算窄带清晰权重 u, v ∈ [0, 1]
+        const u = crispSnapCurve(gx);
+        const v = crispSnapCurve(gy);
+
+        const horizontal = gx >= 0 ? 'right' : 'left';
+        const vertical = gy >= 0 ? 'down' : 'up';
+        const corner = gy < 0 ? (gx >= 0 ? 'upRight' : 'upLeft') : (gx >= 0 ? 'downRight' : 'downLeft');
+        const horizImg = poseFrames[horizontal], vertImg = poseFrames[vertical], cornerImg = poseFrames[corner];
+        const drawPose = (key, alpha) => {
+          ctx.globalAlpha = alpha;
+          ctx.drawImage(poseFrames[key], dx, dy, drawW, drawH);
+        };
+
+        // 若 u, v 落在纯单帧锁定区，直接单次绘制（零重叠、100% 原画锐度）
+        if (u === 0 && v === 0) {
+          drawPose('center', 1);
+          return;
+        }
+        if (u === 1 && v === 0 && horizImg) {
+          drawPose(horizontal, 1);
+          return;
+        }
+        if (u === 0 && v === 1 && vertImg) {
+          drawPose(vertical, 1);
+          return;
+        }
+        if (u === 1 && v === 1 && cornerImg) {
+          drawPose(corner, 1);
+          return;
+        }
+
+        // 仅在跨越边界的窄过渡带内执行双线性混合
+        drawPose('center', 1);
+
+        if (u > 0.002 && horizImg) {
+          drawPose(horizontal, u);
+        }
+        if (v > 0.002) {
+          ctx.globalAlpha = v * (1 - u);
+          if (ctx.globalAlpha > 0.002 && vertImg) {
+            drawPose(vertical, ctx.globalAlpha);
+          }
+          if (u > 0.002 && cornerImg) {
+            ctx.globalAlpha = (u * v) / (1 - v * (1 - u) + 1e-6);
+            drawPose(corner, ctx.globalAlpha);
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function updatePointer(x, y) {
+        pointerX = Math.max(-1, Math.min(1, x)); pointerY = Math.max(-1, Math.min(1, y));
+        wake();
+      }
+
+      function stopTracking() {
+        if (trackingPointer !== null && pointerSurface.hasPointerCapture(trackingPointer)) pointerSurface.releasePointerCapture(trackingPointer);
+        trackingPointer = null;
+        introCanvas.dataset.tracking = 'false';
+        wake();
+      }
+
+      function releaseTracking() {
+        stopTracking();
+        pointerX = 0; pointerY = 0;
+        wake();
+      }
+
+      function layout(preserveProgress = false) {
+        const previousProgress = progress;
+        const height = window.innerHeight;
+        root.style.setProperty('--vh', `${height / 100}px`);
+        const stacked = window.innerWidth <= 600 || (window.innerWidth <= 900 && height > window.innerWidth);
+        const ellipseWidth = Math.min(window.innerWidth * (stacked ? 1.12 : .72), height * (stacked ? .40 : .64) * 1280 / 720);
+        root.style.setProperty('--ellipse-width', `${ellipseWidth}px`);
+        root.style.setProperty('--ellipse-height', `${ellipseWidth * 720 / 1280}px`);
+        const rect = pointerSurface.getBoundingClientRect();
+        introWindowWidth = rect.width; introWindowHeight = rect.height;
+        const introImageHeight = Math.max(introWindowHeight, introWindowWidth * 720 / 1280);
+        introImageWidth = introImageHeight * 1280 / 720;
+        introCenterX = rect.left + rect.width / 2; introCenterY = rect.top + rect.height / 2;
+        track.style.height = `${Math.max(1, duration) * height}px`;
+        maxScroll = Math.max(1, track.offsetHeight - height);
+        document.getElementById('chapter-2').style.top = `${secondPageTime / duration * maxScroll}px`;
+        document.getElementById('chapter-3').style.top = `${thirdPageTime / duration * maxScroll}px`;
+        if (preserveProgress) {
+          scrollPosition = previousProgress * maxScroll;
+          window.scrollTo({ top: scrollPosition, behavior: 'instant' });
+        } else scrollPosition = window.scrollY;
+        wake();
+      }
+      function cancelIntroSnap() {
+        clearTimeout(introSnapTimer);
+        introSnapArmed = false;
+      }
+      function cancelWorkCompletion() {
+        clearTimeout(workSnapTimer);
+        workCompletion = null;
+      }
+      function startWorkCompletion() {
+        if (document.hidden || window.scrollY / maxScroll + .0003 < thirdPageTime / duration) return;
+        if (reduced.matches) {
+          window.scrollTo({ top: maxScroll, behavior: 'instant' });
+          return;
+        }
+        // 等当前滚动帧解码完成，再从可见动作开始按原速补完。
+        if (mode !== 'outro' || outro.readyState < 2 || outro.seeking || outroFailed) {
+          if (!outroFailed) workSnapTimer = window.setTimeout(startWorkCompletion, 180);
+          return;
+        }
+        workCompletion = { sourceTime: outro.currentTime, scroll: window.scrollY };
+        lastTick = performance.now();
+        wake();
+      }
+      function onScroll() {
+        const scroll = Math.max(0, window.scrollY);
+        const delta = scroll - scrollPosition;
+        scrollPosition = scroll;
+        if (workCompletion && Math.abs(scroll - workCompletion.scroll) < 2) { wake(); return; }
+        cancelWorkCompletion();
+        if (scroll / maxScroll + .0003 >= thirdPageTime / duration && scroll < maxScroll - 1) {
+          // 停止180ms后按源视频1倍速补完，不用浏览器短促的平滑滚动。
+          workSnapTimer = window.setTimeout(startWorkCompletion, 180);
+        }
+        const destination = secondPageTime / duration * maxScroll;
+        clearTimeout(introSnapTimer);
+        if (delta > .5 && scroll > 0 && scroll < destination - 1) introSnapArmed = true;
+        if (delta < -.5 || scroll <= 0 || scroll >= destination - 1) introSnapArmed = false;
+        if (introSnapArmed) {
+          // 滚动停止160ms后补完首屏展开；向上回看不触发吸附。
+          introSnapTimer = window.setTimeout(() => {
+            introSnapArmed = false;
+            const top = secondPageTime / duration * maxScroll;
+            if (!document.hidden && window.scrollY > 0 && window.scrollY < top - 1) {
+              window.scrollTo({ top, behavior: reduced.matches ? 'instant' : 'smooth' });
+            }
+          }, 160);
+        }
+        wake();
+      }
+      function showStatus(message) {
+        statusText.textContent = message;
+        status.hidden = false;
+      }
+      function hideStatus() { if (!fatalError && !(mode === 'outro' && (outroFailed || workFailed)) && !(mode === 'intro' && introFailed && !use2DGazeEngine)) status.hidden = true; }
+      function setWorking(active) {
+        active = active && !workFailed && workVideo.readyState >= 2;
+        if (active !== working) {
+          working = active;
+          workVideo.classList.toggle('is-visible', active);
+          outro.classList.toggle('is-visible', mode === 'outro' && !active);
+          if (active && !workVideo.seeking) workVideo.currentTime = workFallback ? 6 : 0;
+        }
+        document.body.dataset.working = String(active);
+        if (!active || document.hidden || reduced.matches) workVideo.pause();
+        else if (workVideo.paused && !workVideo.seeking) workVideo.play().catch(() => {});
+      }
+      function setMode(next) {
+        if (next === mode) return;
+        mode = next;
+        if (next !== 'intro') {
+          stopTracking();
+          pointerX = 0; pointerY = 0;
+          root.style.setProperty('--mouse-x', '0px');
+          root.style.setProperty('--mouse-y', '0px');
+          root.style.setProperty('--tilt-x', '0deg');
+          root.style.setProperty('--tilt-y', '0deg');
+        }
+        document.body.dataset.mode = next;
+        Object.entries(layers).forEach(([name, layer]) => layer.classList.toggle('is-visible', name === next));
+        main.pause(); outro.pause();
+        if (next !== 'outro') setWorking(false);
+        if (next === 'outro' && outroFailed) showStatus('第三屏视频加载失败，请检查 assets/videos/尾部视频.mp4 文件。');
+        else if (!introFailed || next !== 'intro' || use2DGazeEngine) hideStatus();
+      }
+      function setChapter(next) {
+        if (next === chapterIndex) return;
+        chapterIndex = next;
+        chapters.forEach((chapter, index) => {
+          const active = index === next;
+          chapter.classList.toggle('is-active', active);
+          chapter.setAttribute('aria-hidden', String(!active));
+          chapter.inert = !active;
+        });
+        navLinks.forEach((link, index) => {
+          if (index === next) link.setAttribute('aria-current', 'step');
+          else link.removeAttribute('aria-current');
+        });
+        document.getElementById('chapter-number').textContent = `0${next + 1} / 03`;
+        document.getElementById('chapter-name').textContent = names[next];
+      }
+      function formatTime(time) {
+        const seconds = Math.max(0, Math.floor(time));
+        return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+      }
+      function wake() { if (!frameId && !document.hidden) frameId = requestAnimationFrame(tick); }
+      function tick(now) {
+        frameId = 0;
+        const dt = Math.min(64, Math.max(1, now - lastTick));
+        lastTick = now;
+        if (workCompletion && mode === 'outro' && outro.readyState >= 2 && !outroFailed) {
+          workCompletion.sourceTime = Math.min(outroDuration, workCompletion.sourceTime + dt / 1000);
+          workCompletion.scroll = (thirdPageTime + workCompletion.sourceTime / outroDuration * (duration - thirdPageTime)) / duration * maxScroll;
+          window.scrollTo({ top: workCompletion.scroll, behavior: 'instant' });
+          if (workCompletion.sourceTime >= outroDuration) workCompletion = null;
+        }
+        const scroll = Math.max(0, window.scrollY);
+        progress = Math.min(1, Math.max(0, scroll / maxScroll));
+        const target = progress * duration;
+        if (target >= secondPageTime - .003) loadThirdPageMedia();
+        document.body.dataset.storyTime = target.toFixed(4);
+        // 主视频在第三屏起点前完整走到末帧，第三屏使用独立视频。
+        const mainTarget = Math.min(duration, target / thirdPageTime * duration);
+        const outroProgress = Math.min(1, Math.max(0, (target - thirdPageTime) / Math.max(.001, duration - thirdPageTime)));
+        const outroTarget = outroProgress * outroDuration;
+        const blend = reduced.matches ? 1 : 1 - Math.exp(-dt / 55);
+        smoothTime += (mainTarget - smoothTime) * blend;
+        if (Math.abs(mainTarget - smoothTime) < .008) smoothTime = mainTarget;
+        smoothOutroTime += (outroTarget - smoothOutroTime) * blend;
+        if (Math.abs(outroTarget - smoothOutroTime) < .008) smoothOutroTime = outroTarget;
+        let desiredMode = scroll === 0 ? 'intro' : target + .003 >= thirdPageTime ? 'outro' : 'main';
+        if (!mediaReady && scroll > 1 && !fatalError) showStatus('正在准备画面，请稍候…');
+        if (!mediaReady && desiredMode !== 'intro') desiredMode = 'intro';
+        // 先完成末帧解码再衔接第三屏；已进入后换源加载不退出。
+        if (desiredMode === 'outro' && mode !== 'outro' && main.currentTime < duration - .05) desiredMode = 'main';
+        if (desiredMode === 'outro' && outro.readyState < 2 && !outroFailed && mode !== 'outro') desiredMode = 'main';
+        setMode(desiredMode);
+        if (mediaReady) {
+          const seekTime = Math.min(Math.max(0, smoothTime), Math.max(0, duration - .001));
+          if (!main.seeking && now - lastSeek >= 33 && Math.abs(main.currentTime - seekTime) > .003) {
+            main.currentTime = seekTime;
+            lastSeek = now;
+          }
+        }
+        if (outro.readyState >= 2 && !outroFailed) {
+          const seekTime = Math.min(Math.max(0, smoothOutroTime), Math.max(0, outroDuration - .001));
+          if (!outro.seeking && now - lastOutroSeek >= 33 && Math.abs(outro.currentTime - seekTime) > .003) {
+            outro.currentTime = seekTime;
+            lastOutroSeek = now;
+          }
+        }
+        setWorking(mode === 'outro' && progress >= .9998 && outro.currentTime >= outroDuration - .05 && !outro.seeking);
+        const copyTime = desiredMode === 'intro' ? 0 : desiredMode === 'outro' ? thirdPageTime : main.currentTime / duration * thirdPageTime;
+        setChapter(copyTime + .003 < 2.4 ? 0 : copyTime + .003 < thirdPageTime ? 1 : 2);
+        const viewportWidth = root.clientWidth || innerWidth;
+        const videoWidth = 1280 * Math.max(viewportWidth / 1280, innerHeight / 720);
+        const overflow = videoWidth - viewportWidth;
+        const subjectX = .5 + .17 * Math.min(1, Math.max(0, (main.currentTime - 2.4) / 1.1));
+        const focus = x => overflow > 1 ? Math.min(100, Math.max(0, (videoWidth * x - viewportWidth / 2) / overflow * 100)) : 50;
+        root.style.setProperty('--video-focus', `${focus(subjectX)}%`);
+        const outroSubjectX = .67 + .07 * Math.min(1, Math.max(0, (outro.currentTime - 2) / 4));
+        root.style.setProperty('--outro-focus', `${focus(outroSubjectX)}%`);
+        const expansion = main.currentTime + .003 >= fullScreenSourceTime ? 1 : Math.min(1, Math.max(0, (main.currentTime - 2.4) / 1.1));
+        const baseImageWidth = introImageWidth + (videoWidth - introImageWidth) * expansion;
+        const handoffBlend = Math.min(1, Math.max(0, (main.currentTime - 8.8) / .8));
+        const imageWidth = baseImageWidth * (1 + (handoff.scale - 1) * handoffBlend);
+        const imageHeight = imageWidth * 720 / 1280;
+        const stacked = innerWidth <= 600 || (innerWidth <= 900 && innerHeight > innerWidth);
+        const baseLeft = stacked && baseImageWidth > viewportWidth ? Math.min(0, Math.max(viewportWidth - baseImageWidth, viewportWidth / 2 - baseImageWidth * subjectX)) : (viewportWidth - baseImageWidth) / 2;
+        const left = baseLeft + baseImageWidth * handoff.x * handoffBlend + imageWidth / 2;
+        const windowWidth = introWindowWidth + (viewportWidth - introWindowWidth) * expansion;
+        const windowHeight = introWindowHeight + (innerHeight - introWindowHeight) * expansion;
+        mainWindow.style.width = `${windowWidth}px`; mainWindow.style.height = `${windowHeight}px`;
+        mainWindow.style.left = `${introCenterX + (viewportWidth / 2 - introCenterX) * expansion}px`; mainWindow.style.top = `${introCenterY + (innerHeight / 2 - introCenterY) * expansion}px`;
+        mainWindow.style.clipPath = expansion < 1 ? `ellipse(${50 + 50 * expansion}% ${50 + 50 * expansion}% at 50% 50%)` : 'none';
+        main.style.width = `${imageWidth}px`; main.style.height = `${imageHeight}px`;
+        main.style.left = `${left - viewportWidth / 2 + windowWidth / 2}px`;
+        main.style.top = `${windowHeight / 2 + baseImageWidth * 720 / 1280 * ((handoff.scale - 1) / 2 + handoff.y) * handoffBlend}px`;
+        fill.style.transform = `scaleX(${progress})`;
+        dot.style.left = `${progress * 100}%`;
+        progressBar.setAttribute('aria-valuenow', String(Math.round(progress * 100)));
+        timeLabel.textContent = `${formatTime(target)} / ${formatTime(duration)}`;
+        if (Math.abs(scroll - lastScroll) > 1) direction.textContent = scroll > lastScroll ? '向下探索' : '向上回看';
+        lastScroll = scroll;
+
+        let introPending = false;
+        if (mode === 'intro') {
+          // 95ms 阻尼收敛：让跨越窄过渡带更加干脆利落
+          const gazeBlend = reduced.matches ? 1 : 1 - Math.exp(-dt / 95);
+          smoothGazeX += (pointerX - smoothGazeX) * gazeBlend;
+          smoothGazeY += (pointerY - smoothGazeY) * gazeBlend;
+          if (Math.abs(pointerX - smoothGazeX) < 0.002) smoothGazeX = pointerX;
+          if (Math.abs(pointerY - smoothGazeY) < 0.002) smoothGazeY = pointerY;
+
+          // 驱动椭圆视窗位移与 3D 卡片倾角 (--tilt-x, --tilt-y)
+          root.style.setProperty('--mouse-x', `${(smoothGazeX * 14).toFixed(1)}px`);
+          root.style.setProperty('--mouse-y', `${(smoothGazeY * 10).toFixed(1)}px`);
+          root.style.setProperty('--tilt-x', `${(-smoothGazeY * 6.5).toFixed(2)}deg`);
+          root.style.setProperty('--tilt-y', `${(smoothGazeX * 8.5).toFixed(2)}deg`);
+
+          if (use2DGazeEngine) {
+            render2DGaze(smoothGazeX, smoothGazeY);
+            introPending = Math.hypot(pointerX - smoothGazeX, pointerY - smoothGazeY) > 0.002;
+          }
+          introCanvas.dataset.pointerX = pointerX.toFixed(3); introCanvas.dataset.pointerY = pointerY.toFixed(3);
+        }
+        const seekPending = mediaReady && Math.abs(main.currentTime - Math.min(mainTarget, duration - .001)) > .003;
+        const outroSeekPending = outro.readyState >= 2 && !outroFailed && Math.abs(outro.currentTime - Math.min(outroTarget, outroDuration - .001)) > .003;
+        if (workCompletion || Math.abs(mainTarget - smoothTime) > .008 || Math.abs(outroTarget - smoothOutroTime) > .008 || seekPending || outroSeekPending || introPending) wake();
+      }
+      main.addEventListener('loadedmetadata', () => {
+        if (!Number.isFinite(main.duration) || main.duration <= 0) return;
+        const durationChanged = Math.abs(duration - main.duration) > .001;
+        duration = main.duration;
+        main.pause();
+        if (durationChanged) layout(true);
+        else wake();
+      });
+      main.addEventListener('loadeddata', () => { mediaReady = true; main.pause(); hideStatus(); wake(); });
+      main.addEventListener('seeked', wake);
+      main.addEventListener('play', () => main.pause());
+      main.addEventListener('error', () => {
+        mediaReady = false;
+        if (!mainFallback) { mainFallback = true; main.src = 'assets/videos/主视频.mp4'; main.load(); }
+        else { fatalError = true; showStatus('主视频加载失败，请检查 assets/videos/主视频.mp4 文件。'); }
+      });
+      outro.addEventListener('error', () => {
+        if (!thirdPageMediaRequested) return;
+        cancelWorkCompletion();
+        if (!outroFallback) { outroFallback = true; outro.src = 'assets/videos/尾部视频.mp4'; outro.load(); }
+        else { outroFailed = true; showStatus('第三屏视频加载失败，请检查 assets/videos/尾部视频.mp4 文件。'); }
+      });
+      outro.addEventListener('loadedmetadata', () => {
+        if (!Number.isFinite(outro.duration) || outro.duration <= 0) return;
+        outroDuration = outro.duration;
+        outro.pause();
+        wake();
+      });
+      outro.addEventListener('loadeddata', () => { outro.pause(); hideStatus(); onScroll(); wake(); });
+      outro.addEventListener('seeked', wake);
+      outro.addEventListener('play', () => outro.pause());
+      workVideo.addEventListener('loadedmetadata', () => { workVideo.loop = !workFallback; wake(); });
+      workVideo.addEventListener('loadeddata', wake);
+      workVideo.addEventListener('seeked', wake);
+      workVideo.addEventListener('play', () => { if (!working || document.hidden || reduced.matches) workVideo.pause(); });
+      workVideo.addEventListener('ended', () => {
+        if (working && workFallback && !workVideo.seeking) { workVideo.currentTime = 6; wake(); }
+      });
+      workVideo.addEventListener('error', () => {
+        if (!thirdPageMediaRequested) return;
+        setWorking(false);
+        if (!workFallback) { workFallback = true; workVideo.src = 'assets/videos/尾部视频.mp4'; workVideo.load(); }
+        else { workFailed = true; setWorking(false); showStatus('工作循环暂时无法播放，请检查尾部视频文件。'); }
+      });
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', () => layout(true), { passive: true });
+
+      function returnToBiography() {
+        if (document.getElementById('work-detail').open || window.scrollY / maxScroll + .0003 < thirdPageTime / duration) return false;
+        cancelWorkCompletion();
+        cancelIntroSnap();
+        setWorking(false);
+        // 直接回到展开完成的第二屏，取消正在进行的自动补完滚动。
+        window.scrollTo({ top: secondPageTime / duration * maxScroll, behavior: 'instant' });
+        wake();
+        return true;
+      }
+      let returnWheelUntil = 0;
+      window.addEventListener('wheel', event => {
+        if (!event.ctrlKey && !event.metaKey && event.deltaY > 0 && Math.abs(event.deltaY) >= Math.abs(event.deltaX) && !document.getElementById('work-detail').open) cancelWorkCompletion();
+        if (event.ctrlKey || event.metaKey || event.deltaY >= 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY) || document.getElementById('work-detail').open) return;
+        // 同一触控板手势的惯性尾段停留在第二屏，不越过履历起点。
+        if (performance.now() < returnWheelUntil || returnToBiography()) {
+          event.preventDefault();
+          returnWheelUntil = performance.now() + 240;
+        }
+      }, { passive: false });
+      let returnTouchY = null, returnedTouch = false;
+      window.addEventListener('touchstart', event => {
+        returnTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
+        returnedTouch = false;
+      }, { passive: true });
+      window.addEventListener('touchmove', event => {
+        if (returnTouchY === null || event.touches.length !== 1) return;
+        if (returnedTouch || (event.touches[0].clientY - returnTouchY > 12 && returnToBiography())) {
+          event.preventDefault();
+          returnedTouch = true;
+        }
+      }, { passive: false });
+      for (const type of ['touchend', 'touchcancel']) window.addEventListener(type, () => { returnTouchY = null; returnedTouch = false; }, { passive: true });
+      window.addEventListener('keydown', event => {
+        if (event.defaultPrevented || event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+        if ((event.key === 'ArrowUp' || event.key === 'PageUp') && returnToBiography()) event.preventDefault();
+        else if (['ArrowDown', 'PageDown', 'Home', 'End', ' '].includes(event.key) && !document.getElementById('work-detail').open) cancelWorkCompletion();
+      });
+
+      window.addEventListener('pointermove', event => {
+        if (mode !== 'intro') return;
+        if (event.pointerType !== 'mouse' && trackingPointer !== event.pointerId) return;
+        updatePointer((event.clientX - introCenterX) / ((root.clientWidth || innerWidth) * .38), (event.clientY - introCenterY) / (innerHeight * .38));
+      }, { passive: true });
+
+      window.addEventListener('pointerdown', event => {
+        if (mode !== 'intro' || event.button !== 0 || trackingPointer !== null) return;
+        if (event.target.closest('a, button, input, textarea, select')) return;
+        if (event.pointerType !== 'mouse' && !pointerSurface.contains(event.target)) return;
+        trackingPointer = event.pointerId;
+        introCanvas.dataset.tracking = 'true';
+        if (event.pointerType !== 'mouse') pointerSurface.setPointerCapture(event.pointerId);
+        updatePointer((event.clientX - introCenterX) / ((root.clientWidth || innerWidth) * .38), (event.clientY - introCenterY) / (innerHeight * .38));
+      });
+      for (const type of ['pointerup', 'pointercancel']) window.addEventListener(type, event => {
+        if (trackingPointer === event.pointerId && (type === 'pointercancel' || !(event.buttons & 1))) {
+          if (type === 'pointerup') releaseTracking(); else stopTracking();
+        }
+      });
+      pointerSurface.addEventListener('keydown', event => {
+        if (mode !== 'intro') return;
+        const arrows = { ArrowLeft: [-.25, 0], ArrowRight: [.25, 0], ArrowUp: [0, -.25], ArrowDown: [0, .25] };
+        if (arrows[event.key]) { event.preventDefault(); updatePointer(pointerX + arrows[event.key][0], pointerY + arrows[event.key][1]); }
+        if (event.key === 'Home' || event.key === 'Escape') { event.preventDefault(); updatePointer(0, 0); }
+      });
+      document.documentElement.addEventListener('pointerleave', () => { releaseTracking(); });
+      window.addEventListener('blur', releaseTracking);
+      document.querySelectorAll('[data-jump], [data-progress]').forEach(link => {
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          cancelIntroSnap();
+          cancelWorkCompletion();
+          const p = link.hasAttribute('data-progress') ? Number(link.dataset.progress) : Number(link.dataset.jump) / duration;
+          window.scrollTo({ top: p * maxScroll, behavior: reduced.matches ? 'instant' : 'smooth' });
+        });
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { cancelIntroSnap(); cancelWorkCompletion(); outro.pause(); workVideo.pause(); stopTracking(); cancelAnimationFrame(frameId); frameId = 0; }
+        else { lastTick = performance.now(); onScroll(); wake(); }
+      });
+      reduced.addEventListener('change', () => {
+        if (reduced.matches) {
+          cancelWorkCompletion();
+          outro.pause(); workVideo.pause();
+          if (window.scrollY / maxScroll + .0003 >= thirdPageTime / duration) window.scrollTo({ top: maxScroll, behavior: 'instant' });
+        }
+        wake();
+      });
+      window.addEventListener('pageshow', () => { layout(); });
+      layout(); main.pause(); outro.pause(); workVideo.pause();
+    })();
+  </script>
+  <dialog id="work-detail" class="work-detail" aria-labelledby="detail-title">
+    <button class="detail-close" type="button" aria-label="关闭作品详情"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    <div class="detail-layout">
+      <div class="detail-gallery" id="detail-gallery"></div>
+      <div class="detail-copy" id="detail-copy" role="region" aria-labelledby="detail-title" tabindex="0"><p class="content-topline" id="detail-category"></p><h2 id="detail-title"></h2><p id="detail-summary"></p><dl id="detail-meta"></dl><p id="detail-description"></p><div id="detail-links" class="detail-links" hidden><h3>作品链接</h3><ul id="detail-link-list"></ul></div></div>
+      <div class="detail-controls"><button class="text-button" id="detail-prev">← 上一件</button><span id="detail-counter"></span><button class="text-button" id="detail-next">下一件 →</button></div>
+    </div>
+  </dialog>
+  <script src="assets/portfolio-model.js"></script>
+  <script src="assets/portfolio-content.js"></script>
+</body>
+</html>
